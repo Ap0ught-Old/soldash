@@ -39,6 +39,7 @@ def get_details():
             elif details['status'] == 'error':
                 host['details'] = None
                 host['error'] = details['data']
+                host['exception'] = details['exception']
         retval.append(entry)
     return retval
 
@@ -102,8 +103,10 @@ def query_solr(host, command, core, params=None, url=None):
                   'data': simplejson.load(conn)}
     except urllib2.HTTPError, e:
         retval = {'status': 'error',
-                  'data': 'conf'}
+                  'data': 'conf',
+                  'exception': str(e)}
     except urllib2.URLError, e:
         retval = {'status': 'error', 
-                  'data': 'down'}
+                  'data': 'down',
+                  'exception': str(e)}
     return retval

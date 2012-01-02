@@ -60,7 +60,7 @@
                         <% } %>
                     <% } %>
                 <% } else { %>
-                    <td class="status critical"><%=host.error%></td>
+                    <td class="status critical"><%=host.error%><% if(debug === 'true') { console.log(host) } %></td>
                 <% } %>
             </tr>
         <% } %>
