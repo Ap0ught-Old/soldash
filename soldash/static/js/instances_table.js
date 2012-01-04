@@ -224,7 +224,7 @@ function getExecuteButtonClass(command, det) {
     if(command === 'fetchindex') {
         if(det['isSlave'] === 'true') {
             if(det['slave']['isReplicating'] === 'true') {
-                return 'working'
+                return 'working';
             } else if(det['slave']['isReplicating'] === 'false') {
                 return 'ready';
             }
