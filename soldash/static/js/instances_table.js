@@ -75,6 +75,15 @@ function setupClickHandlers() {
         }
         command_click(command, host, idConverter(id));
     });
+    
+    $('.fetchindex .executebutton.working').tooltip({
+        delay: 0,
+        track: true,
+        showURL: false,
+        fade: 250,
+        showBody: " - "
+    });
+    
 }
 
 function getHostFromID(id) {
@@ -263,6 +272,17 @@ function getExecuteButtonClass(command, det) {
     }
 }
 
+function getExecuteButtonTitle(command, det) {
+    if(command !== 'fetchindex') {
+        return '';
+    } else {
+        if(det['slave']['isReplicating'] === 'true') {
+            return det['slave']['totalPercent'] + '%';
+        } else {
+            return '';
+        }
+    }
+}
 function changeIcon(element_id, new_icon) {
     /**
      * element_id: id of the element that was clicked to trigger this function 

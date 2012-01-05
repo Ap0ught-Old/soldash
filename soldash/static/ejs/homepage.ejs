@@ -54,7 +54,7 @@
                             <% var element_id = [core['core_name'],host.hostname.replace(/\./g,'_'),host.port,command.command,command.reverse].join('-'); %>
                             <td class="<%= command.command %>">
                                 <a href="#">
-                                    <div class="executebutton <%= getExecuteButtonClass(command.command, det) %>" id="<%= element_id %>"> </div>
+                                    <div class="executebutton <%= getExecuteButtonClass(command.command, det) %>" id="<%= element_id %>" title="<%= getExecuteButtonTitle(command.command, det) %>"> </div>
                                 </a>
                             </td>
                         <% } %>
