@@ -273,15 +273,12 @@ function getExecuteButtonClass(command, det) {
 }
 
 function getExecuteButtonTitle(command, det) {
-    if(command !== 'fetchindex') {
-        return '';
-    } else {
+    if(command === 'fetchindex' && det['slave'] !== undefined) {
         if(det['slave']['isReplicating'] === 'true') {
             return det['slave']['totalPercent'] + '%';
-        } else {
-            return '';
         }
     }
+    return '';
 }
 function changeIcon(element_id, new_icon) {
     /**
