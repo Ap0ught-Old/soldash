@@ -81,7 +81,7 @@ function setupClickHandlers() {
         track: true,
         showURL: false,
         fade: 250,
-        showBody: " - "
+        showBody: " - " 
     });
     
 }
