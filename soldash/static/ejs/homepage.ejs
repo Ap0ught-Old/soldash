@@ -51,7 +51,7 @@
                     <% for(var k=0; k<commands.length; k++) { %>
                         <% var command = commands[k]; %>
                         <% if(commands[k].title) { %>
-                            <% var element_id = [core['core_name'],host.hostname.replace(/\./g,'_'),host.port,command.command,command.reverse].join('-'); %>
+                            <% var element_id = [core['core_name'],host.hostname.replace(/\./g,'_'),host.port,command.command,command.reverse].join('-!SOLDASH!-'); %>
                             <td class="<%= command.command %>">
                                 <a href="#">
                                     <div class="executebutton <%= getExecuteButtonClass(command.command, det) %>" id="<%= element_id %>"> </div>
