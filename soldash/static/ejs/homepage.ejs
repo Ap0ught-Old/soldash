@@ -26,7 +26,7 @@
         </tr>
         <% for(var j=0; j<core.hosts.length; j++) { %>
             <% var host = core.hosts[j]; %>
-            <% var row_id = [core['core_name'],host.hostname.replace(/\./g,'_'),host.port].join('-'); %>
+            <% var row_id = [core['core_name'],host.hostname.replace(/\./g,'_'),host.port].join('-!SOLDASH!-'); %>
             <tr id="<%= row_id %>">
                 <td class="address">
                 <a href="http://<%= host.hostname %>:<%= host.port %>/solr<% if(core['core_name'] != 'None') { %>/<%= core['core_name'] %><% } %>/admin/"><%= host.hostname %></a>

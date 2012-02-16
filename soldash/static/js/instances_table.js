@@ -104,11 +104,11 @@ function idConverter(data) {
      */
     var retval = ''
     if(typeof(data) === 'string') {
-        retval = data.split('-');
+        retval = data.split('-!SOLDASH!-');
         retval[1] = retval[1].replace(/\_/g,'.') 
     } else if(typeof(data) === 'object'){
         data[1] = data[1].replace(/\./g,'_');
-        retval = data.join('-');
+        retval = data.join('-!SOLDASH!-');
     }
     return retval;
 }
