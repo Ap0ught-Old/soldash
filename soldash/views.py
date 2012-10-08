@@ -15,12 +15,11 @@
 #limitations under the License.
 #
 
-from flask import render_template, request, jsonify
+from flask import request, jsonify, g
+from flaskext.mako import render_template
 
 from soldash import app
 from soldash.helpers import get_details, query_solr, get_solr_versions
-from soldash.settings import (RESPONSEHEADERS, COMMANDS, JS_REFRESH, 
-                              DEBUG, HIDE_STATUS_MSG_SUCCESS, HIDE_STATUS_MSG_ERROR)
 
 @app.route('/')
 def homepage():
@@ -28,12 +27,11 @@ def homepage():
         
     This HTML will then be populated by javascript and EJS.
     '''
-    cores = get_details()
-    return render_template('homepage.html', cores=cores)
+    return render_template('/main.mako', config=app.config, c=get_details(), versions=get_solr_versions())
 
 @app.route('/execute/<command>', methods=['POST'])
 def execute(command):
-    ''' Execute a command (one of soldash.settings.COMMANDS).
+    ''' Execute a command (one of soldash.settings['COMMANDS']).
     
     Returns the output in JSON form.
     '''
@@ -68,18 +66,3 @@ def solr_versions():
     '''
     
     return jsonify({'data': get_solr_versions()})
-
-@app.route('/details', methods=['GET'])
-def details():
-    ''' Get details about the current state of all Solr instances.
-    
-    Returns the output in JSON form.
-    '''
-    retval = get_details()
-    return jsonify({'data': retval,
-                    'solr_response_headers': RESPONSEHEADERS,
-                    'commands': COMMANDS,
-                    'js_refresh': JS_REFRESH,
-                    'debug': str(DEBUG).lower(),
-                    'hide_status_msg_success': HIDE_STATUS_MSG_SUCCESS,
-                    'hide_status_msg_error': HIDE_STATUS_MSG_ERROR})

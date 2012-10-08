@@ -21,7 +21,9 @@ import simplejson
 import socket
 
 from flask import jsonify
-from soldash.settings import HOSTS, CORES, TIMEOUT, DEFAULTCORENAME
+
+from soldash import app
+
 
 def get_details():
     ''' Query Solr for information on each of the cores of 
@@ -29,9 +31,9 @@ def get_details():
     '''
     
     retval = []
-    for core in CORES:
+    for core in app.config['CORES']:
         entry = {'core_name': core, 
-                 'hosts': copy.deepcopy(HOSTS)}
+                 'hosts': copy.deepcopy(app.config['HOSTS'])}
         for host in entry['hosts']:
             details = query_solr(host, 'details', core)
             if details['status'] == 'ok':
@@ -51,10 +53,10 @@ def get_solr_versions():
     '''
     
     retval = {}
-    for host in HOSTS:
+    for host in app.config['HOSTS']:
         url = 'http://%s:%s/solr/%s/admin/system?wt=json' %(host['hostname'],
                                                             host['port'],
-                                                            DEFAULTCORENAME)
+                                                            app.config['DEFAULTCORENAME'])
         system_data = query_solr(host, None, None, url=url)
         if system_data['status'] == 'ok':
             retval[host['hostname']] = system_data['data']['lucene']['lucene-spec-version']
@@ -66,15 +68,15 @@ def get_solr_versions():
 def query_solr(host, command, core, params=None, url=None):
     ''' Build a HTTP query to a Solr host and execute it. 
     
-    host: host dictionary (see soldash.settings.HOSTS)
-    command: command to be performed (see soldash.settings.COMMANDS)
-    core: perform this command on a certain core (see soldash.settings.CORES)
+    host: host dictionary (see soldash.settings['HOSTS'])
+    command: command to be performed (see soldash.settings['COMMANDS'])
+    core: perform this command on a certain core (see soldash.settings['CORES'])
     params: extra parameters to pass in the URL.
     url: if a non-empty string, use this string as the URL, instead of building one.
     '''
-    socket.setdefaulttimeout(TIMEOUT)
+    socket.setdefaulttimeout(app.config['TIMEOUT'])
     if not core:
-        core = DEFAULTCORENAME
+        core = app.config['DEFAULTCORENAME']
     
     if not url:
         if command == 'reload':
