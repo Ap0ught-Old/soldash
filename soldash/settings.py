@@ -12,8 +12,6 @@ settings = {
 
     'TIMEOUT': 1,
 
-    'JS_REFRESH': 2,
-
     'HIDE_STATUS_MSG_SUCCESS': 2,
 
     'HIDE_STATUS_MSG_ERROR': 5,
