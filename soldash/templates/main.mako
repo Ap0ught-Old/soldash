@@ -21,7 +21,7 @@
                 <th>Fetch Index</th>
                 <th>Polling</th>
                 <th>Replication</th>
-                <th>File List</th>
+                ##<th>File List</th>
                 <th>Backup</th>
                 <th>Reload Index</th>
             </tr>
@@ -74,9 +74,9 @@
                             </a>
                         % endif
                     </td>
-                    <td class="command filelist">
-                        <div class="executebutton ready"></div>
-                    </td>
+                    ##<td class="command filelist">
+                    ##    <div class="executebutton ready"></div>
+                    ##</td>
                     <td class="command backup">
                         <a href="${url_for('execute', command='backup', hostname=host['hostname'], core=core['core_name'])}">
                             <img src="/static/images/ready.png">
