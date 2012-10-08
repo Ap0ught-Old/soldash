@@ -16,8 +16,13 @@
 #limitations under the License.
 #
 
+from flaskext.mako import init_mako
+
 from soldash import app
-from soldash.settings import DEBUG
+from soldash.settings import settings
+
 
 if __name__ == '__main__':
-    app.run(debug=DEBUG)
+    app.config.update(settings)
+    init_mako(app)
+    app.run(debug=app.config['DEBUG'])

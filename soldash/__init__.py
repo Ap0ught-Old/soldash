@@ -21,6 +21,8 @@ __author__ = 'Aengus Walton'
 __version__ = '0.2'
 __homepage__ = 'https://github.com/edelight/soldash'
 
+from flask import Flask, g
+
 app = Flask(__name__)
 
 import views
