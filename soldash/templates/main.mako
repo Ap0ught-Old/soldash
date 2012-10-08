@@ -1,8 +1,6 @@
 <%inherit file="base.mako"/>
 
 <%def name="body_content()">
-    ${c}
-    <P>${versions}</P>
     % for core in c:
         <%
         for host in core['hosts']:
