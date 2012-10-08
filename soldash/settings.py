@@ -2,7 +2,12 @@
 settings = {
     'HOSTS': [
         {
-            'hostname': '127.0.0.1',
+            'hostname': 'srv00072.edelight.net',
+            'port': 8983,
+            'auth': {'username': 'test', 'password': 'test'}
+        },
+        {
+            'hostname': 'srv00141.edelight.net',
             'port': 8983,
             'auth': {'username': 'test', 'password': 'test'}
         }
@@ -20,22 +25,7 @@ settings = {
 
     'DEBUG': True,
 
-    'DEFAULTCORENAME': 'collection1',
-
-    'RESPONSEHEADERS': {0: 'ok'},
-
-    'COMMANDS': [
-        {'command': 'fetchindex', 'title': 'Fetch Index', 'reverse': 'abortfetch'},
-        {'command': 'enablepoll', 'title': 'Polling', 'reverse': 'disablepoll'},
-        {'command': 'enablereplication', 'title': 'Replication', 'reverse': 'disablereplication'}, 
-        {'command': 'details', 'title': False}, 
-        {'command': 'filelist', 'title': 'File List'},
-        {'command': 'backup', 'title': 'Backup'},
-        {'command': 'reload', 'title': 'Reload Index'}
-    ],
-
-
-
+    'DEFAULTCORENAME': 'de_DE-items',
 
     # one or more directories
     'MAKO_DIR': 'soldash/templates',

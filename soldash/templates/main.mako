@@ -4,6 +4,13 @@
     ${c}
     <P>${versions}</P>
     % for core in c:
+        <%
+        for host in core['hosts']:
+            if host.get('type') == 'master':
+                master_version = host['indexVersion']
+                break
+        print master_version
+        %>
         <h3>${core['core_name'] or 'Default Core'}</h3>
         <table class="instances" id="instances_${str(core['core_name'])}">
             <tr>
@@ -14,39 +21,75 @@
                 <th>Index Version</th>
                 <th>Generation</th>
                 <th>Index Size</th>
-                % for command in config['COMMANDS']:
-                    % if command.get('title'):
-                        <th>${command['title']}</th>
-                    % endif
-                % endfor
+                <th>Fetch Index</th>
+                <th>Polling</th>
+                <th>Replication</th>
+                <th>File List</th>
+                <th>Backup</th>
+                <th>Reload Index</th>
             </tr>
         % for host in core['hosts']:
             <tr>
                 <td class="address">
                     ${self.insert_host_link(host, core['core_name'])}
                 </td>
-                % if host['details']:
-                    <% details = host['details']['details'] %>
-                    <% status = host['details']['responseHeader']['status'] %>
-                    <td class="status ${config['RESPONSEHEADERS'][status]}">
-                        ${config['RESPONSEHEADERS'][status]}
+                % if host['status'] == 'ok':
+                    <td class="status ${host['status']}">
+                        ${host['status']}
                     </td>
                     <td class="solr_version">
-                        tbd
-                    </td>
-                    <td class="type ${'master' if details['isMaster'] == 'true' else 'slave'}">
-                        % if details['isMaster'] == 'true':
-                            M
-                        % else:
-                            S
+                        % if versions.get(host['hostname']):
+                            ${versions[host['hostname']]}
                         % endif
                     </td>
-                    <td class="version fixed_width_font">${details['indexVersion']}</td>
-                    <td class="generation">${details['generation']}</td>
-                    <td class="size">${details['indexSize']}</td>
-                    % for command in config['COMMANDS']:
-                        <td>${self.insert_command_link(command)}</td>
-                    % endfor
+                    <td class="type ${host['type']}">
+                        ${host['type']}
+                    </td>
+                    <td class="version ${'out_of_sync' if host['indexVersion'] != master_version else ''}">
+                        ${host['indexVersion']}
+                    </td>
+                    <td class="generation">${host['generation']}</td>
+                    <td class="size">${host['indexSize']}</td>
+                    <td class="command fetchindex">
+                        % if host['type'] == 'slave':
+                            % if host['replicating']:
+                                <img src="/static/images/working.gif" title="${host['replicating']}">
+                            % else:
+                                <a href="${url_for('execute', command='fetchindex', hostname=host['hostname'], core=core['core_name'])}">
+                                    <img src="/static/images/ready.png">
+                                </a>
+                            % endif
+                        % endif
+                    </td>
+                    <td class="command polling">
+                        % if host['type'] == 'slave':
+                            <% command = 'disablepoll' if host['pollingEnabled'] else 'enablepoll' %>
+                            <a href="${url_for('execute', command=command, hostname=host['hostname'], core=core['core_name'])}">
+                                <img src="/static/images/${'enabled' if host['pollingEnabled'] else 'disabled'}.png">
+                            </a>
+                        % endif
+                    </td>
+                    <td class="command replication">
+                        % if host['type'] == 'master':
+                            <% command = 'disablereplication' if host['replicationEnabled'] else 'enablereplication' %>
+                            <a href="${url_for('execute', command=command, hostname=host['hostname'], core=core['core_name'])}">
+                                <img src="/static/images/${'enabled' if host['replicationEnabled'] else 'disabled'}.png">
+                            </a>
+                        % endif
+                    </td>
+                    <td class="command filelist">
+                        <div class="executebutton ready"></div>
+                    </td>
+                    <td class="command backup">
+                        <a href="${url_for('execute', command='backup', hostname=host['hostname'], core=core['core_name'])}">
+                            <img src="/static/images/ready.png">
+                        </a>
+                    </td>
+                    <td class="command reload">
+                        <a href="${url_for('execute', command='reload', hostname=host['hostname'], core=core['core_name'])}">
+                            <img src="/static/images/reload.png">
+                        </a>
+                    </td>
                 % else:
                     <td class="status critical">${host['error']}</td>
                 % endif
@@ -63,8 +106,4 @@
     % endif
     <% url += '/admin' %>
     <a href="${url}">${host['hostname']}</a>
-</%def>
-
-<%def name="insert_command_link(command)">
-    ${command}
 </%def>

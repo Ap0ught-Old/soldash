@@ -15,54 +15,34 @@
 #limitations under the License.
 #
 
-from flask import request, jsonify, g
+from flask import request, jsonify, abort, redirect
 from flaskext.mako import render_template
 
 from soldash import app
-from soldash.helpers import get_details, query_solr, get_solr_versions
+import soldash.helpers as h
 
 @app.route('/')
 def homepage():
-    ''' Render and return the main homepage HTML. 
-        
-    This HTML will then be populated by javascript and EJS.
-    '''
-    return render_template('/main.mako', config=app.config, c=get_details(), versions=get_solr_versions())
+    """ Render and return the main homepage HTML. 
+    """
+    versions = {}
+    for host in app.config['HOSTS']:
+        versions[host['hostname']] = h.get_solr_version(host)
+    return render_template('/main.mako', c=h.get_details(), versions=versions, h=h)
 
-@app.route('/execute/<command>', methods=['POST'])
+@app.route('/execute/<command>', methods=['GET'])
 def execute(command):
-    ''' Execute a command (one of soldash.settings['COMMANDS']).
-    
-    Returns the output in JSON form.
-    '''
-    hostname = request.form['host']
-    port = request.form['port']
-    
-    core = request.form['core']
-    if core in ['null', 'None', 'undefined']:
-        core = None
-    auth = {}
-    params = {}
+    """ Execute a command
+    """
+    hostname = request.args.get('hostname')
+    core = request.args.get('core')
+    if core not in app.config['CORES']:
+        abort(400, 'Invalid core')
+    # TODO: check validity of command name
     try:
-        auth = {'username': request.form['username'],
-                'password': request.form['password']}
-    except KeyError, e:
-        pass
-    try:
-        params = {'indexversion': request.form['indexversion']}
-    except KeyError, e:
-        pass
-    host = {'hostname': hostname,
-            'port': port,
-            'auth': auth}
-    return jsonify(query_solr(host, command, core, params=params))
-
-@app.route('/solr_versions', methods=['GET'])
-def solr_versions():
-    ''' Get the versions of all Solr daemons configured in 
-    soldash.settings.HOSTS.
-    
-    Returns the output in JSON form.
-    '''
-    
-    return jsonify({'data': get_solr_versions()})
+        host = [obj for obj in app.config['HOSTS'] if obj['hostname'] == hostname][0]
+    except KeyError:
+        abort(400, 'Invalid hostname')
+    # TODO: Error checking from Solr
+    h.query_solr(host, command, core)
+    return redirect('/')

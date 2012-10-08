@@ -36,40 +36,49 @@ def get_details():
                  'hosts': copy.deepcopy(app.config['HOSTS'])}
         for host in entry['hosts']:
             details = query_solr(host, 'details', core)
-            if details['status'] == 'ok':
-                host['details'] = details['data']
-            elif details['status'] == 'error':
-                host['details'] = None
+            host['status'] = details['status']
+            if host['status'] == 'ok':
+                if details['data']['details']['isMaster'] == 'true':
+                    host['type'] = 'master'
+                    host['replicationEnabled'] = details['data']['details']['master']['replicationEnabled'] == 'true'
+                else:
+                    host['type'] = 'slave'
+                    host['replicating'] = False
+                    if details['data']['details']['slave']['isReplicating'] == 'true':
+                        host['replicating'] = details['data']['details']['slave']['totalPercent'] + '%'
+                    host['pollingEnabled'] = details['data']['details']['slave']['isPollingDisabled'] == 'false'
+                host['indexVersion'] = details['data']['details']['indexVersion']
+                host['generation'] = details['data']['details']['generation']
+                host['indexSize'] = details['data']['details']['indexSize']
+            elif host['status'] == 'error':
                 host['error'] = details['data']
                 host['exception'] = details['exception']
         retval.append(entry)
+    print retval
     return retval
 
-def get_solr_versions():
-    ''' Query each Solr host for system information.
+def get_solr_version(host):
+    ''' Query a Solr host for system information.
     
     Strip out and return the Solr version, since it's all we're interested
     in for the time being.
     '''
     
-    retval = {}
-    for host in app.config['HOSTS']:
-        url = 'http://%s:%s/solr/%s/admin/system?wt=json' %(host['hostname'],
-                                                            host['port'],
-                                                            app.config['DEFAULTCORENAME'])
-        system_data = query_solr(host, None, None, url=url)
-        if system_data['status'] == 'ok':
-            retval[host['hostname']] = system_data['data']['lucene']['lucene-spec-version']
-        else:
-            retval[host['hostname']] = None
-    return retval
+    url = 'http://%s:%s/solr/%s/admin/system?wt=json' %(host['hostname'],
+                                                        host['port'],
+                                                        app.config['DEFAULTCORENAME'])
+    system_data = query_solr(host, None, None, url=url)
+    if system_data['status'] == 'ok':
+        return system_data['data']['lucene']['lucene-spec-version']
+    else:
+        return None
     
 
 def query_solr(host, command, core, params=None, url=None):
     ''' Build a HTTP query to a Solr host and execute it. 
     
     host: host dictionary (see soldash.settings['HOSTS'])
-    command: command to be performed (see soldash.settings['COMMANDS'])
+    command: command to be performed
     core: perform this command on a certain core (see soldash.settings['CORES'])
     params: extra parameters to pass in the URL.
     url: if a non-empty string, use this string as the URL, instead of building one.
