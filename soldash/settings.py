@@ -2,12 +2,7 @@
 settings = {
     'HOSTS': [
         {
-            'hostname': 'srv00072.edelight.net',
-            'port': 8983,
-            'auth': {'username': 'test', 'password': 'test'}
-        },
-        {
-            'hostname': 'srv00141.edelight.net',
+            'hostname': '127.0.0.1',
             'port': 8983,
             'auth': {'username': 'test', 'password': 'test'}
         }

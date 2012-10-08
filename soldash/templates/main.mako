@@ -9,7 +9,6 @@
             if host.get('type') == 'master':
                 master_version = host['indexVersion']
                 break
-        print master_version
         %>
         <h3>${core['core_name'] or 'Default Core'}</h3>
         <table class="instances" id="instances_${str(core['core_name'])}">

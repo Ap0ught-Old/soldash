@@ -54,7 +54,6 @@ def get_details():
                 host['error'] = details['data']
                 host['exception'] = details['exception']
         retval.append(entry)
-    print retval
     return retval
 
 def get_solr_version(host):
@@ -73,7 +72,6 @@ def get_solr_version(host):
     else:
         return None
     
-
 def query_solr(host, command, core, params=None, url=None):
     ''' Build a HTTP query to a Solr host and execute it. 
     
