@@ -16,6 +16,7 @@
             ${self.body_footer()}
         </div>
         ${self.footer_js()}
+        <img src="${url_for('static', filename='images/throbber.gif')}" style="display:none;"/>
     </body>
 </html>
 

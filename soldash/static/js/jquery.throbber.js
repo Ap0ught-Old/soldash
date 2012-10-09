@@ -22,7 +22,7 @@
         var defaultOptions = {
                         ajax: true,
                         delay: 0,
-                        image: "/static/images/ajax-loader.gif",
+                        image: "/static/images/throbber.gif",
                         parent: "",
                         wrap: ""
                 };
