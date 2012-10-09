@@ -43,5 +43,6 @@
 <%def name="footer_js()">
     <script src="${url_for('static', filename='js/jquery-1.8.2.min.js')}"></script>
     <script src="${url_for('static', filename='js/jquery.throbber.js')}"></script>
+    <script src="${url_for('static', filename='js/jquery.simplemodal.1.4.3.min.js')}"></script>
     <script src="${url_for('static', filename='js/base.js')}"></script>
 </%def>

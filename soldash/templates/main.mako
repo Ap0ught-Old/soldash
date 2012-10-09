@@ -21,7 +21,7 @@
                 <th>Fetch Index</th>
                 <th>Polling</th>
                 <th>Replication</th>
-                ##<th>File List</th>
+                <th>File List</th>
                 <th>Backup</th>
                 <th>Reload Index</th>
             </tr>
@@ -47,7 +47,7 @@
                     </td>
                     <td class="generation">${host['generation']}</td>
                     <td class="size">${host['indexSize']}</td>
-                    <td class="command fetchindex">
+                    <td class="command server_side fetchindex">
                         % if host['type'] == 'slave':
                             % if host['replicating']:
                                 <img src="/static/images/working.gif" title="${host['replicating']}">
@@ -58,7 +58,7 @@
                             % endif
                         % endif
                     </td>
-                    <td class="command polling">
+                    <td class="command server_side polling">
                         % if host['type'] == 'slave':
                             <% command = 'disablepoll' if host['pollingEnabled'] else 'enablepoll' %>
                             <a href="${url_for('execute', command=command, hostname=host['hostname'], core=core['core_name'])}">
@@ -66,7 +66,7 @@
                             </a>
                         % endif
                     </td>
-                    <td class="command replication">
+                    <td class="command server_side replication">
                         % if host['type'] == 'master':
                             <% command = 'disablereplication' if host['replicationEnabled'] else 'enablereplication' %>
                             <a href="${url_for('execute', command=command, hostname=host['hostname'], core=core['core_name'])}">
@@ -74,15 +74,17 @@
                             </a>
                         % endif
                     </td>
-                    ##<td class="command filelist">
-                    ##    <div class="executebutton ready"></div>
-                    ##</td>
-                    <td class="command backup">
+                    <td class="command filelist">
+                        <a href="javascript:filelist('${host['hostname']}', '${core['core_name'] or 'None'}', '${host['indexVersion']}')">
+                            <img src="/static/images/ready.png">
+                        </a>
+                    </td>
+                    <td class="command server_side backup">
                         <a href="${url_for('execute', command='backup', hostname=host['hostname'], core=core['core_name'])}">
                             <img src="/static/images/ready.png">
                         </a>
                     </td>
-                    <td class="command reload">
+                    <td class="command server_side reload">
                         <a href="${url_for('execute', command='reload', hostname=host['hostname'], core=core['core_name'])}">
                             <img src="/static/images/reload.png">
                         </a>
