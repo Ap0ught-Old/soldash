@@ -15,6 +15,7 @@
         <div id="footer">
             ${self.body_footer()}
         </div>
+        ${self.footer_js()}
     </body>
 </html>
 
@@ -24,9 +25,6 @@
 </%def>
 
 <%def name="head_js()">
-    <script src="${url_for('static', filename='js/jquery-1.6.4.min.js')}"></script>
-    <script src="${url_for('static', filename='js/simplemodal/jquery.simplemodal.js')}"></script>
-    <script src="${url_for('static', filename='js/instances_table.js')}"></script>
 </%def>
 
 <%def name="body_header()">
@@ -39,4 +37,10 @@
 <%def name="body_footer()">
     <hr/>
     Powered by <a href="http://flask.pocoo.org" target="_new">flask</a> and <a href="https://github.com/tzellman/flask-mako" target="_new">flask-mako</a>.
+</%def>
+
+<%def name="footer_js()">
+    <script src="${url_for('static', filename='js/jquery-1.8.2.min.js')}"></script>
+    <script src="${url_for('static', filename='js/jquery.throbber.js')}"></script>
+    <script src="${url_for('static', filename='js/base.js')}"></script>
 </%def>
