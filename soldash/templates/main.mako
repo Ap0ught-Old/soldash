@@ -103,6 +103,6 @@
     % if core_name:
         <% url += '/%s' % core_name %>
     % endif
-    <% url += '/admin' %>
+    <% url += '/admin/' %>
     <a href="${url}">${host['hostname']}</a>
 </%def>
