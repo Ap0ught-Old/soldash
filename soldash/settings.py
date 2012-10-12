@@ -12,10 +12,6 @@ settings = {
 
     'TIMEOUT': 1,
 
-    'HIDE_STATUS_MSG_SUCCESS': 2,
-
-    'HIDE_STATUS_MSG_ERROR': 5,
-
     'DEBUG': True,
 
     'DEFAULTCORENAME': 'de_DE-items',

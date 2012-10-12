@@ -16,11 +16,12 @@
 #
 
 import copy
-import urllib2
-import simplejson
+import json
 import socket
+import urllib2
 
 from flask import jsonify
+import requests
 
 from soldash import app
 
@@ -98,24 +99,6 @@ def query_solr(host, command, core, params=None, url=None):
     if params:
         for key in params:
             url += '&%s=%s' % (key, params[key])
-    if host.get('auth', {}):
-        passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        passman.add_password(None, url, 
-                             host['auth']['username'], 
-                             host['auth']['password'])
-        auth_handler = urllib2.HTTPBasicAuthHandler(passman)
-        opener = urllib2.build_opener(auth_handler)
-        urllib2.install_opener(opener)
-    try:
-        conn = urllib2.urlopen(url)
-        retval = {'status': 'ok', 
-                  'data': simplejson.load(conn)}
-    except urllib2.HTTPError, e:
-        retval = {'status': 'error',
-                  'data': 'conf',
-                  'exception': str(e)}
-    except urllib2.URLError, e:
-        retval = {'status': 'error', 
-                  'data': 'down',
-                  'exception': str(e)}
-    return retval
+    resp = requests.get(url, auth=(host['auth'].get('username'), host['auth'].get('password')))
+    # TODO: Error checking
+    return {'status': 'ok', 'data': resp.json}

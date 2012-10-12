@@ -14,21 +14,19 @@ It is still very young software and may contain bugs. Any feedback should be sen
 ## Getting Started
 * Clone this git repository
 * Install the necessary dependencies:
-    * pip install flask
-    * pip install fabric
-    * pip install simplejson
+    * pip install -r requirements.txt
 * Edit settings.py according to your Solr setup. More details are provided below.
 * Start the server:
     * python runserver.py
 * Connect to http://localhost:5000 with a web browser
 
 ## settings.py configuration
-settings.py contains a number of variables used by both the backend and frontend of Soldash. 
+settings.py contains a settings dictionary used by both the backend and frontend of Soldash. 
 
-The variables you may need to configure are listed below.  
+The individual settings you may need to configure are listed below.
 
 ### HOSTS
-The HOSTS variable is a list of hosts, each defined in a dictionary. An example entry for an instance of Solr running locally without HTTP authentication required would be:
+The HOSTS value is a list of hosts, each defined in a dictionary. An example entry for an instance of Solr running locally without HTTP authentication required would be:
 
     {'hostname': 'localhost', 
      'port': 8983, 
@@ -53,15 +51,6 @@ If you have a default index and two additional cores, CORES should be defined so
 
 ### TIMEOUT
 TIMEOUT is the timeout (in seconds) for queries to a Solr client. It is best to keep this number relatively low as requests are (not yet) parallelized.
-
-### JS_REFRESH
-JS_REFRESH defines how often (in seconds) a user's browser should refresh the data displayed on the page.
-
-### HIDE_STATUS_MSG_SUCCESS
-Defines how many seconds to wait before hiding a status message if it's being displayed by a successful command execution.
-
-### HIDE_STATUS_MSG_ERROR
-The same as the previous, only for an unsuccessful command execution.
 
 ### DEBUG
 If enabled, the web application will be started in Flask's debug mode (allowing access to traceroutes, etc) and caching of the javascript templates will be disabled. 
