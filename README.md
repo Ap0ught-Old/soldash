@@ -28,34 +28,37 @@ The individual settings you may need to configure are listed below.
 ### HOSTS
 The HOSTS value is a list of hosts, each defined in a dictionary. An example entry for an instance of Solr running locally without HTTP authentication required would be:
 
-    {'hostname': 'localhost', 
-     'port': 8983, 
-     'auth': {}}
+    'HOSTS': {'hostname': 'localhost', 
+              'port': 8983, 
+              'auth': {}}
 
 If HTTP authentication were required by the Solr instance in the last example, the entry would look like this:
 
-    {'hostname': 'localhost', 
-     'port': 8983, 
-     'auth': {'username': 'test', 'password': 'test'}}
+    'HOSTS': {'hostname': 'localhost', 
+              'port': 8983, 
+              'auth': {'username': 'test', 'password': 'test'}}
 
 ### CORES
 CORES is a list of the cores available on the Solr instances. At the moment, due to the primary requirements of this project, Soldash presumes that all Solr instances have the same cores.
 
 If you do not have a multi-core set up, CORES should be defined so:
 
-    CORES = [None]
+    'CORES': [None]
 
 If you have a default index and two additional cores, CORES should be defined so:
 
-    CORES = [None, 'core1', 'core2']
+    'CORES': [None, 'core1', 'core2']
 
 ### TIMEOUT
-TIMEOUT is the timeout (in seconds) for queries to a Solr client. It is best to keep this number relatively low as requests are (not yet) parallelized.
+TIMEOUT is the timeout (in seconds) for queries to a Solr instance. It is best to keep this number relatively low as requests are (not yet) parallelized.
 
 ### DEBUG
-If enabled, the web application will be started in Flask's debug mode (allowing access to traceroutes, etc) and caching of the javascript templates will be disabled. 
+If enabled, the web application will be started in Flask's debug mode (allowing access to traceroutes, etc).
 
 ### DEFAULTCORENAME
 This is the name of your default core in a single-core setup. You can find out what this is from your solr.xml file. 
 
-As it must be set, in a multi-core setup you can simply set it to any arbitrary core. 
+As it must be set, in a multi-core setup you can simply set it to any arbitrary core name.
+
+### Mako config values
+There are a few config values used by flask-mako to render pages. You shouldn't need to modify these, however, if you do, they're documented in the settings.py file itself.
