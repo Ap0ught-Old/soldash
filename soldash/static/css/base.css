@@ -27,6 +27,14 @@ body {
     text-align: right;
 }
 
+.right {
+    float: right;
+}
+
+.left {
+    float: left;
+}
+
 a {
     color: #1b1d26;
 }
@@ -38,6 +46,10 @@ h2,h4,h5,h6 {
 h3 {
     color: #773027;
     margin-bottom: 0;
+}
+
+.countdown {
+    font-size: 0.7em;
 }
 
 .instances td, th {

@@ -1,7 +1,7 @@
 function fadeInAndOut() {
     $(".fade_in_and_out").animate({opacity: 1.0}, {duration: 1000})
         .animate({opacity: 0}, {duration: 1000})
-        .animate({opacity: 1.0}, {duration: 1000, complete: fadeInAndOut})
+        .animate({opacity: 1.0}, {duration: 1000, complete: fadeInAndOut});
 }
 
 function filelist(hostname, core, indexVersion) {
@@ -24,7 +24,23 @@ function filelist(hostname, core, indexVersion) {
     });   
 }
 
+function main() {
+    $(function(){
+      var count = 20;
+      $("span.countdown").html("Reloading in "+count+"...");
+      countdown = setInterval(function(){
+            $("span.countdown").html("Reloading in "+count+"...");
+            if (count == 0) {
+                $("span.countdown").html("Reloading...");
+                window.location.reload();
+            }
+            count--;
+        }, 1000);
+    });
 
+    $(".command.server_side a").throbber("click");
+    
+    fadeInAndOut();
+}
 
-$(".command.server_side a").throbber("click");
-fadeInAndOut();
+main();

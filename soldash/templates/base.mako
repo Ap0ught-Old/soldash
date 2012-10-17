@@ -37,7 +37,12 @@
 
 <%def name="body_footer()">
     <hr/>
-    Powered by <a href="http://flask.pocoo.org" target="_new">flask</a> and <a href="https://github.com/tzellman/flask-mako" target="_new">flask-mako</a>.
+    <div class="left">
+        <span class="countdown"></span>
+    </div>
+    <div class="right">
+        Powered by <a href="http://flask.pocoo.org" target="_new">flask</a> and <a href="https://github.com/tzellman/flask-mako" target="_new">flask-mako</a>.
+    </div>
 </%def>
 
 <%def name="footer_js()">
