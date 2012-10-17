@@ -50,7 +50,7 @@
                     <td class="command server_side fetchindex">
                         % if host['type'] == 'slave':
                             % if host['replicating']:
-                                <img src="/static/images/working.gif" title="${host['replicating']}">
+                                <span class="fade_in_and_out">${host['replicating']}</span>
                             % else:
                                 <a href="${url_for('execute', command='fetchindex', hostname=host['hostname'], core=core['core_name'])}">
                                     <img src="/static/images/ready.png">

@@ -1,4 +1,8 @@
-$(".command.server_side a").throbber("click");
+function fadeInAndOut() {
+    $(".fade_in_and_out").animate({opacity: 1.0}, {duration: 1000})
+        .animate({opacity: 0}, {duration: 1000})
+        .animate({opacity: 1.0}, {duration: 1000, complete: fadeInAndOut})
+}
 
 function filelist(hostname, core, indexVersion) {
     $.ajax({
@@ -17,6 +21,10 @@ function filelist(hostname, core, indexVersion) {
             html += "</table>"
             $.modal(html);
         }
-    });
-    
+    });   
 }
+
+
+
+$(".command.server_side a").throbber("click");
+fadeInAndOut();
