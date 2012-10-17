@@ -16,12 +16,15 @@
 #
 
 import copy
-import urllib2
-import simplejson
+import json
 import socket
+import urllib2
 
 from flask import jsonify
-from soldash.settings import HOSTS, CORES, TIMEOUT, DEFAULTCORENAME
+import requests
+
+from soldash import app
+
 
 def get_details():
     ''' Query Solr for information on each of the cores of 
@@ -29,52 +32,59 @@ def get_details():
     '''
     
     retval = []
-    for core in CORES:
+    for core in app.config['CORES']:
         entry = {'core_name': core, 
-                 'hosts': copy.deepcopy(HOSTS)}
+                 'hosts': copy.deepcopy(app.config['HOSTS'])}
         for host in entry['hosts']:
             details = query_solr(host, 'details', core)
-            if details['status'] == 'ok':
-                host['details'] = details['data']
-            elif details['status'] == 'error':
-                host['details'] = None
+            host['status'] = details['status']
+            if host['status'] == 'ok':
+                if details['data']['details']['isMaster'] == 'true':
+                    host['type'] = 'master'
+                    host['replicationEnabled'] = details['data']['details']['master']['replicationEnabled'] == 'true'
+                else:
+                    host['type'] = 'slave'
+                    host['replicating'] = False
+                    if details['data']['details']['slave']['isReplicating'] == 'true':
+                        host['replicating'] = details['data']['details']['slave']['totalPercent'] + '%'
+                    host['pollingEnabled'] = details['data']['details']['slave']['isPollingDisabled'] == 'false'
+                host['indexVersion'] = details['data']['details']['indexVersion']
+                host['generation'] = details['data']['details']['generation']
+                host['indexSize'] = details['data']['details']['indexSize']
+            elif host['status'] == 'error':
                 host['error'] = details['data']
                 host['exception'] = details['exception']
         retval.append(entry)
     return retval
 
-def get_solr_versions():
-    ''' Query each Solr host for system information.
+def get_solr_version(host):
+    ''' Query a Solr host for system information.
     
     Strip out and return the Solr version, since it's all we're interested
     in for the time being.
     '''
     
-    retval = {}
-    for host in HOSTS:
-        url = 'http://%s:%s/solr/%s/admin/system?wt=json' %(host['hostname'],
-                                                            host['port'],
-                                                            DEFAULTCORENAME)
-        system_data = query_solr(host, None, None, url=url)
-        if system_data['status'] == 'ok':
-            retval[host['hostname']] = system_data['data']['lucene']['lucene-spec-version']
-        else:
-            retval[host['hostname']] = None
-    return retval
+    url = 'http://%s:%s/solr/%s/admin/system?wt=json' %(host['hostname'],
+                                                        host['port'],
+                                                        app.config['DEFAULTCORENAME'])
+    system_data = query_solr(host, None, None, url=url)
+    if system_data['status'] == 'ok':
+        return system_data['data']['lucene']['lucene-spec-version']
+    else:
+        return None
     
-
 def query_solr(host, command, core, params=None, url=None):
     ''' Build a HTTP query to a Solr host and execute it. 
     
-    host: host dictionary (see soldash.settings.HOSTS)
-    command: command to be performed (see soldash.settings.COMMANDS)
-    core: perform this command on a certain core (see soldash.settings.CORES)
+    host: host dictionary (see soldash.settings['HOSTS'])
+    command: command to be performed
+    core: perform this command on a certain core (see soldash.settings['CORES'])
     params: extra parameters to pass in the URL.
     url: if a non-empty string, use this string as the URL, instead of building one.
     '''
-    socket.setdefaulttimeout(TIMEOUT)
+    socket.setdefaulttimeout(app.config['TIMEOUT'])
     if not core:
-        core = DEFAULTCORENAME
+        core = app.config['DEFAULTCORENAME']
     
     if not url:
         if command == 'reload':
@@ -89,24 +99,6 @@ def query_solr(host, command, core, params=None, url=None):
     if params:
         for key in params:
             url += '&%s=%s' % (key, params[key])
-    if host.get('auth', {}):
-        passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        passman.add_password(None, url, 
-                             host['auth']['username'], 
-                             host['auth']['password'])
-        auth_handler = urllib2.HTTPBasicAuthHandler(passman)
-        opener = urllib2.build_opener(auth_handler)
-        urllib2.install_opener(opener)
-    try:
-        conn = urllib2.urlopen(url)
-        retval = {'status': 'ok', 
-                  'data': simplejson.load(conn)}
-    except urllib2.HTTPError, e:
-        retval = {'status': 'error',
-                  'data': 'conf',
-                  'exception': str(e)}
-    except urllib2.URLError, e:
-        retval = {'status': 'error', 
-                  'data': 'down',
-                  'exception': str(e)}
-    return retval
+    resp = requests.get(url, auth=(host['auth'].get('username'), host['auth'].get('password')))
+    # TODO: Error checking
+    return {'status': 'ok', 'data': resp.json}
