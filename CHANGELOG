@@ -2,11 +2,15 @@
 Soldash Changelog
 ====================
 
-Version 0.3 - October 17th 2012
+Version 0.4 - October 17th 2012
 ----------------------------------------
 * Dropped EJS. Now everything is rendered server-side
 * Show replication progress
 * Better filelist display
+
+Version 0.3 - February 16th 2012
+----------------------------------------
+* Bugfix release
 
 Version 0.2.1 - December 13th 2011
 ----------------------------------------
