@@ -16,10 +16,9 @@
 #limitations under the License.
 #
 
-from flaskext.mako import init_mako
-
 from soldash import app
 from soldash.settings import settings
+from soldash.flaskext.mako import init_mako
 
 
 if __name__ == '__main__':

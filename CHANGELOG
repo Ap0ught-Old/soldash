@@ -2,6 +2,10 @@
 Soldash Changelog
 ====================
 
+Version 0.4.1 - October 18th 2012
+----------------------------------------
+* Fixed invalid import in runserver.py
+
 Version 0.4 - October 17th 2012
 ----------------------------------------
 * Dropped EJS. Now everything is rendered server-side
