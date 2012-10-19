@@ -21,7 +21,19 @@ function filelist(hostname, core, indexVersion) {
             html += "</table>"
             $.modal(html);
         }
-    });   
+    });
+}
+
+function openQueryDialog(hostname, core) {
+    var html = '<form name="queryForm"><textarea rows="4" cols="30" name="q">solr</textarea><input name="version" type="hidden" value="2.2">';
+    html += '<input name="start" type="hidden" value="0"><input name="rows" type="hidden" value="10">';
+    html += '<input name="indent" type="hidden" value="on">';
+    html += '<br><input type="submit" value="search" onclick="submitQuery(\''+hostname+'\', \''+core+'\', queryForm.q.value)"></form>';
+    $.modal(html);
+}
+
+function submitQuery(hostname, core, query) {
+    window.open('/execute/select?hostname='+hostname+'&core='+core+'&q='+query);
 }
 
 function main() {
@@ -34,7 +46,9 @@ function main() {
                 $("span.countdown").html("Reloading...");
                 window.location.reload();
             }
-            count--;
+            if($('#simplemodal-container').length == 0) {
+                count--;
+            }
         }, 1000);
     });
 
