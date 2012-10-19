@@ -2,6 +2,11 @@
 Soldash Changelog
 ====================
 
+Version 0.4.2 - October 19th 2012
+----------------------------------------
+* Don't refresh if a modal dialog is open.
+* Also added quick n dirty capability to issue direct Solr queries
+
 Version 0.4.1 - October 18th 2012
 ----------------------------------------
 * Fixed invalid import in runserver.py
