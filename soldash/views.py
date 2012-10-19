@@ -37,10 +37,13 @@ def execute(command):
     hostname = request.args.get('hostname')
     core = request.args.get('core')
     params = {}
-    if command == 'filelist':
-        params['indexversion'] = request.args.get('indexversion')
     if core not in app.config['CORES']:
         abort(400, 'Invalid core')
+
+    if command == 'filelist':
+        params['indexversion'] = request.args.get('indexversion')
+    elif command == 'select':
+        params['q'] = request.args.get('q')
     # TODO: check validity of command name
     try:
         host = [obj for obj in app.config['HOSTS'] if obj['hostname'] == hostname][0]
@@ -48,6 +51,6 @@ def execute(command):
         abort(400, 'Invalid hostname')
     # TODO: Error checking from Solr
     retval = h.query_solr(host, command, core, params=params)
-    if command == 'filelist':
+    if command in ['filelist', 'select']:
         return jsonify(retval)
     return redirect('/')

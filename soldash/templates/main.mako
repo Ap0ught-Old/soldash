@@ -23,6 +23,7 @@
                 <th>Replication</th>
                 <th>File List</th>
                 <th>Backup</th>
+                <th>Query</th>
                 <th>Reload Index</th>
             </tr>
         % for host in core['hosts']:
@@ -81,6 +82,11 @@
                     </td>
                     <td class="command server_side backup">
                         <a href="${url_for('execute', command='backup', hostname=host['hostname'], core=core['core_name'])}">
+                            <img src="/static/images/ready.png">
+                        </a>
+                    </td>
+                    <td class="command query">
+                        <a href="javascript:openQueryDialog('${host['hostname']}', '${core['core_name'] or 'None'}')">
                             <img src="/static/images/ready.png">
                         </a>
                     </td>
