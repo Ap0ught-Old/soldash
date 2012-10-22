@@ -3,13 +3,13 @@
 <%def name="body_content()">
     % for core in c:
         <%
-        for host in core['hosts']:
-            if host.get('type') == 'master':
-                master_version = host['indexVersion']
+        for host in c[core]:
+            if c[core][host].get('type') == 'master':
+                master_version = c[core][host]['indexVersion']
                 break
         %>
-        <h3>${core['core_name'] or 'Default Core'}</h3>
-        <table class="instances" id="instances_${str(core['core_name'])}">
+        <h3>${core or 'Default Core'}</h3>
+        <table class="instances" id="instances_${str(core)}">
             <tr>
                 <th>Host</th>
                 <th>Status</th>
@@ -26,10 +26,11 @@
                 <th>Query</th>
                 <th>Reload Index</th>
             </tr>
-        % for host in core['hosts']:
+        % for hostip in c[core]:
+            <% host = c[core][hostip] %>
             <tr>
                 <td class="address">
-                    ${self.insert_host_link(host, core['core_name'])}
+                    ${self.insert_host_link(host, core)}
                 </td>
                 % if host['status'] == 'ok':
                     <td class="status ${host['status']}">
@@ -62,7 +63,7 @@
                     <td class="command server_side polling">
                         % if host['type'] == 'slave':
                             <% command = 'disablepoll' if host['pollingEnabled'] else 'enablepoll' %>
-                            <a href="${url_for('execute', command=command, hostname=host['hostname'], core=core['core_name'])}">
+                            <a href="${url_for('execute', command=command, hostname=hostip, core=core)}">
                                 <img src="/static/images/${'enabled' if host['pollingEnabled'] else 'disabled'}.png">
                             </a>
                         % endif
@@ -70,28 +71,28 @@
                     <td class="command server_side replication">
                         % if host['type'] == 'master':
                             <% command = 'disablereplication' if host['replicationEnabled'] else 'enablereplication' %>
-                            <a href="${url_for('execute', command=command, hostname=host['hostname'], core=core['core_name'])}">
+                            <a href="${url_for('execute', command=command, hostname=hostip, core=core)}">
                                 <img src="/static/images/${'enabled' if host['replicationEnabled'] else 'disabled'}.png">
                             </a>
                         % endif
                     </td>
                     <td class="command filelist">
-                        <a href="javascript:filelist('${host['hostname']}', '${core['core_name'] or 'None'}', '${host['indexVersion']}')">
+                        <a href="javascript:filelist('${hostip}', '${core or 'None'}', '${host['indexVersion']}')">
                             <img src="/static/images/ready.png">
                         </a>
                     </td>
                     <td class="command server_side backup">
-                        <a href="${url_for('execute', command='backup', hostname=host['hostname'], core=core['core_name'])}">
+                        <a href="${url_for('execute', command='backup', hostname=hostip, core=core)}">
                             <img src="/static/images/ready.png">
                         </a>
                     </td>
                     <td class="command query">
-                        <a href="javascript:openQueryDialog('${host['hostname']}', '${core['core_name'] or 'None'}')">
+                        <a href="javascript:openQueryDialog('${hostip}', '${core or 'None'}')">
                             <img src="/static/images/ready.png">
                         </a>
                     </td>
                     <td class="command server_side reload">
-                        <a href="${url_for('execute', command='reload', hostname=host['hostname'], core=core['core_name'])}">
+                        <a href="${url_for('execute', command='reload', hostname=hostip, core=core)}">
                             <img src="/static/images/reload.png">
                         </a>
                     </td>

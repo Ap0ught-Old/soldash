@@ -15,6 +15,8 @@
 #limitations under the License.
 #
 
+from multiprocessing import Pool
+
 from flask import request, jsonify, abort, redirect
 from flaskext.mako import render_template
 
@@ -28,7 +30,14 @@ def homepage():
     versions = {}
     for host in app.config['HOSTS']:
         versions[host['hostname']] = h.get_solr_version(host)
-    return render_template('/main.mako', c=h.get_details(), versions=versions, h=h)
+
+    pool = Pool(processes=len(app.config['HOSTS']))
+    pool_data = []
+    for core in app.config['CORES']:
+        for host in app.config['HOSTS']:
+            pool_data.append({'core': core, 'host': host})
+    c = h.repackage_details(pool.map(h.get_details, pool_data))
+    return render_template('/main.mako', c=c, versions=versions, h=h)
 
 @app.route('/execute/<command>', methods=['GET'])
 def execute(command):

@@ -26,43 +26,46 @@ import requests
 from soldash import app
 
 
-def get_details():
-    ''' Query Solr for information on each of the cores of 
-    each of the hosts.
-    '''
+def get_details(data):
+    """ Query Solr for information on a core in a host
+    data should be in the form {'core': 'name', 'host': {'hostname': ...}}
+    """
     
-    retval = []
-    for core in app.config['CORES']:
-        entry = {'core_name': core, 
-                 'hosts': copy.deepcopy(app.config['HOSTS'])}
-        for host in entry['hosts']:
-            details = query_solr(host, 'details', core)
-            host['status'] = details['status']
-            if host['status'] == 'ok':
-                if details['data']['details']['isMaster'] == 'true':
-                    host['type'] = 'master'
-                    host['replicationEnabled'] = details['data']['details']['master']['replicationEnabled'] == 'true'
-                else:
-                    host['type'] = 'slave'
-                    host['replicating'] = False
-                    if details['data']['details']['slave']['isReplicating'] == 'true':
-                        host['replicating'] = details['data']['details']['slave']['totalPercent'] + '%'
-                    host['pollingEnabled'] = details['data']['details']['slave']['isPollingDisabled'] == 'false'
-                host['indexVersion'] = details['data']['details']['indexVersion']
-                host['generation'] = details['data']['details']['generation']
-                host['indexSize'] = details['data']['details']['indexSize']
-            elif host['status'] == 'error':
-                host['error'] = details['data']
-                host['exception'] = details['exception']
-        retval.append(entry)
+    retval = data['host']
+    retval['core'] = data['core']
+    details = query_solr(data['host'], 'details', data['core'])
+    retval['status'] = details['status']
+    if retval['status'] == 'ok':
+        if details['data']['details']['isMaster'] == 'true':
+            retval['type'] = 'master'
+            retval['replicationEnabled'] = details['data']['details']['master']['replicationEnabled'] == 'true'
+        else:
+            retval['type'] = 'slave'
+            retval['replicating'] = False
+            if details['data']['details']['slave']['isReplicating'] == 'true':
+                retval['replicating'] = details['data']['details']['slave']['totalPercent'] + '%'
+            retval['pollingEnabled'] = details['data']['details']['slave']['isPollingDisabled'] == 'false'
+        retval['indexVersion'] = details['data']['details']['indexVersion']
+        retval['generation'] = details['data']['details']['generation']
+        retval['indexSize'] = details['data']['details']['indexSize']
+    elif retval['status'] == 'error':
+        retval['error'] = details['data']
+        retval['exception'] = details['exception']
+    return retval
+
+def repackage_details(details):
+    """ Constructs a single dict from a list of get_details() results """
+    retval = {}
+    for entry in details:
+        retval.setdefault(entry['core'], {})[entry['hostname']] = entry
     return retval
 
 def get_solr_version(host):
-    ''' Query a Solr host for system information.
+    """ Query a Solr host for system information.
     
     Strip out and return the Solr version, since it's all we're interested
     in for the time being.
-    '''
+    """
     
     url = 'http://%s:%s/solr/%s/admin/system?wt=json' %(host['hostname'],
                                                         host['port'],
@@ -74,14 +77,14 @@ def get_solr_version(host):
         return None
 
 def query_solr(host, command, core, params=None, url=None):
-    ''' Build a HTTP query to a Solr host and execute it. 
+    """ Build a HTTP query to a Solr host and execute it. 
     
     host: host dictionary (see soldash.settings['HOSTS'])
     command: command to be performed
     core: perform this command on a certain core (see soldash.settings['CORES'])
     params: extra parameters to pass in the URL.
     url: if a non-empty string, use this string as the URL, instead of building one.
-    '''
+    """
     socket.setdefaulttimeout(app.config['TIMEOUT'])
     if not core:
         core = app.config['DEFAULTCORENAME']
