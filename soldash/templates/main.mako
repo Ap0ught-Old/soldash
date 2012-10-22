@@ -54,7 +54,7 @@
                             % if host['replicating']:
                                 <span class="fade_in_and_out">${host['replicating']}</span>
                             % else:
-                                <a href="${url_for('execute', command='fetchindex', hostname=host['hostname'], core=core['core_name'])}">
+                                <a href="${url_for('execute', command='fetchindex', hostname=host['hostname'], core=core)}">
                                     <img src="/static/images/ready.png">
                                 </a>
                             % endif
