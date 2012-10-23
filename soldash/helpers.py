@@ -108,6 +108,6 @@ def query_solr(host, command, core, params=None, url=None):
             url += '&%s=%s' % (key, params[key])
     try:
         resp = requests.get(url, auth=(host['auth'].get('username'), host['auth'].get('password')))
-    except requests.ConnectionError:
-        return {'status': 'error', 'data': 'down'}
+    except requests.ConnectionError, e:
+        return {'status': 'error', 'data': 'down', 'exception': str(e)}
     return {'status': 'ok', 'data': resp.json}
