@@ -37,7 +37,8 @@ def homepage():
         for host in app.config['HOSTS']:
             pool_data.append({'core': core, 'host': host})
     c = h.repackage_details(pool.map(h.get_details, pool_data))
-    return render_template('/main.mako', c=c, versions=versions, h=h)
+    return render_template('/main.mako', c=c, h=h, 
+                           versions=versions, config=app.config)
 
 @app.route('/execute/<command>', methods=['GET'])
 def execute(command):
