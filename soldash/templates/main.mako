@@ -97,7 +97,7 @@
                         </a>
                     </td>
                 % else:
-                    <td class="status critical">${host['error']}</td>
+                    <td class="status critical" label="${host.get('exception', '')}">${host['error']}</td>
                 % endif
             </tr>
         % endfor

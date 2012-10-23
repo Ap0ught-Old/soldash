@@ -85,7 +85,6 @@ def query_solr(host, command, core, params=None, url=None):
     params: extra parameters to pass in the URL.
     url: if a non-empty string, use this string as the URL, instead of building one.
     """
-    socket.setdefaulttimeout(app.config['TIMEOUT'])
     if not core:
         core = app.config['DEFAULTCORENAME']
     
@@ -107,6 +106,8 @@ def query_solr(host, command, core, params=None, url=None):
     if params:
         for key in params:
             url += '&%s=%s' % (key, params[key])
-    resp = requests.get(url, auth=(host['auth'].get('username'), host['auth'].get('password')))
-    # TODO: Error checking
+    try:
+        resp = requests.get(url, auth=(host['auth'].get('username'), host['auth'].get('password')))
+    except requests.ConnectionError, e:
+        return {'status': 'error', 'data': 'down', 'exception': str(e)}
     return {'status': 'ok', 'data': resp.json}
