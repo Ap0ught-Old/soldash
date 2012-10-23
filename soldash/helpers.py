@@ -71,7 +71,7 @@ def get_solr_version(host):
                                                         host['port'],
                                                         app.config['DEFAULTCORENAME'])
     system_data = query_solr(host, None, None, url=url)
-    if system_data['status'] == 'ok':
+    if system_data['status'] == 'ok' and system_data['data']:
         return system_data['data']['lucene']['lucene-spec-version']
     else:
         return None
