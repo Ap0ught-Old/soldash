@@ -1,7 +1,7 @@
 <%inherit file="base.mako"/>
 
 <%def name="body_content()">
-    % for core in c:
+    % for core in config['CORES']:
         <%
         for host in c[core]:
             if c[core][host].get('type') == 'master':
@@ -26,7 +26,7 @@
                 <th>Query</th>
                 <th>Reload Index</th>
             </tr>
-        % for hostip in c[core]:
+        % for hostip in [host['hostname'] for host in config['HOSTS']]:
             <% host = c[core][hostip] %>
             <tr>
                 <td class="address">
