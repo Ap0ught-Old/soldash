@@ -90,19 +90,14 @@ def query_solr(host, command, core, params=None, url=None):
     
     if not url:
         if command == 'reload':
-            url = 'http://%s:%s/solr/admin/cores?action=RELOAD&wt=json&core=%s' % (host['hostname'], 
-                                                                                   host['port'],
-                                                                                   core)
+            url = 'http://%s:%s/solr/admin/cores?action=RELOAD&wt=json&core=%s' % (
+                host['hostname'], host['port'], core)
         elif command == 'select':
-            url = 'http://%s:%s/solr/%s/select?wt=json&q=%s' % (host['hostname'],
-                                                                host['port'],
-                                                                core,
-                                                                params['q'])
+            url = 'http://%s:%s/solr/%s/select?wt=json&q=%s&fl=%s' % (
+                host['hostname'], host['port'], core, params['q'], params.get('fl', ''))
         else:
-            url = 'http://%s:%s/solr/%s/replication?command=%s&wt=json' % (host['hostname'], 
-                                                                           host['port'], 
-                                                                           core,
-                                                                           command)
+            url = 'http://%s:%s/solr/%s/replication?command=%s&wt=json' % (
+                host['hostname'], host['port'], core, command)
     if params:
         for key in params:
             url += '&%s=%s' % (key, params[key])

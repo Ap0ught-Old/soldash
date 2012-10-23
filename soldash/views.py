@@ -54,6 +54,7 @@ def execute(command):
         params['indexversion'] = request.args.get('indexversion')
     elif command == 'select':
         params['q'] = request.args.get('q')
+        params['fl'] = request.args.get('fl', '')
     # TODO: check validity of command name
     try:
         host = [obj for obj in app.config['HOSTS'] if obj['hostname'] == hostname][0]
