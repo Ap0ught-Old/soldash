@@ -50,7 +50,7 @@ def get_details(data):
         retval['indexSize'] = details['data']['details']['indexSize']
     elif retval['status'] == 'error':
         retval['error'] = details['data']
-        retval['exception'] = details['exception']
+        retval['exception'] = details.get('exception', '')
     return retval
 
 def repackage_details(details):
@@ -105,4 +105,9 @@ def query_solr(host, command, core, params=None, url=None):
         resp = requests.get(url, auth=(host['auth'].get('username'), host['auth'].get('password')))
     except requests.ConnectionError, e:
         return {'status': 'error', 'data': 'down', 'exception': str(e)}
+    
+    data = resp.json
+    if not data:
+        return {'status': 'error', 'data': 'empty response'}
+
     return {'status': 'ok', 'data': resp.json}
