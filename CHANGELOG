@@ -2,6 +2,25 @@
 Soldash Changelog
 ====================
 
+Version 0.4.2 - October 19th 2012
+----------------------------------------
+* Don't refresh if a modal dialog is open.
+* Also added quick n dirty capability to issue direct Solr queries
+
+Version 0.4.1 - October 18th 2012
+----------------------------------------
+* Fixed invalid import in runserver.py
+
+Version 0.4 - October 17th 2012
+----------------------------------------
+* Dropped EJS. Now everything is rendered server-side
+* Show replication progress
+* Better filelist display
+
+Version 0.3 - February 16th 2012
+----------------------------------------
+* Bugfix release
+
 Version 0.2.1 - December 13th 2011
 ----------------------------------------
 * Fixes for multicore setups

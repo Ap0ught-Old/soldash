@@ -16,97 +16,98 @@
 #
 
 import copy
-import urllib2
-import simplejson
+import json
 import socket
+import urllib2
 
 from flask import jsonify
-from soldash.settings import HOSTS, CORES, TIMEOUT, DEFAULTCORENAME
+import requests
 
-def get_details():
-    ''' Query Solr for information on each of the cores of 
-    each of the hosts.
-    '''
+from soldash import app
+
+
+def get_details(data):
+    """ Query Solr for information on a core in a host
+    data should be in the form {'core': 'name', 'host': {'hostname': ...}}
+    """
     
-    retval = []
-    for core in CORES:
-        entry = {'core_name': core, 
-                 'hosts': copy.deepcopy(HOSTS)}
-        for host in entry['hosts']:
-            details = query_solr(host, 'details', core)
-            if details['status'] == 'ok':
-                host['details'] = details['data']
-            elif details['status'] == 'error':
-                host['details'] = None
-                host['error'] = details['data']
-                host['exception'] = details['exception']
-        retval.append(entry)
+    retval = data['host']
+    retval['core'] = data['core']
+    details = query_solr(data['host'], 'details', data['core'])
+    retval['status'] = details['status']
+    if retval['status'] == 'ok':
+        if details['data']['details']['isMaster'] == 'true':
+            retval['type'] = 'master'
+            retval['replicationEnabled'] = details['data']['details']['master']['replicationEnabled'] == 'true'
+        else:
+            retval['type'] = 'slave'
+            retval['replicating'] = False
+            if details['data']['details']['slave']['isReplicating'] == 'true':
+                retval['replicating'] = details['data']['details']['slave']['totalPercent'] + '%'
+            retval['pollingEnabled'] = details['data']['details']['slave']['isPollingDisabled'] == 'false'
+        retval['indexVersion'] = details['data']['details']['indexVersion']
+        retval['generation'] = details['data']['details']['generation']
+        retval['indexSize'] = details['data']['details']['indexSize']
+    elif retval['status'] == 'error':
+        retval['error'] = details['data']
+        retval['exception'] = details.get('exception', '')
     return retval
 
-def get_solr_versions():
-    ''' Query each Solr host for system information.
+def repackage_details(details):
+    """ Constructs a single dict from a list of get_details() results """
+    retval = {}
+    for entry in details:
+        retval.setdefault(entry['core'], {})[entry['hostname']] = entry
+    return retval
+
+def get_solr_version(host):
+    """ Query a Solr host for system information.
     
     Strip out and return the Solr version, since it's all we're interested
     in for the time being.
-    '''
+    """
     
-    retval = {}
-    for host in HOSTS:
-        url = 'http://%s:%s/solr/%s/admin/system?wt=json' %(host['hostname'],
-                                                            host['port'],
-                                                            DEFAULTCORENAME)
-        system_data = query_solr(host, None, None, url=url)
-        if system_data['status'] == 'ok':
-            retval[host['hostname']] = system_data['data']['lucene']['lucene-spec-version']
-        else:
-            retval[host['hostname']] = None
-    return retval
-    
+    url = 'http://%s:%s/solr/%s/admin/system?wt=json' %(host['hostname'],
+                                                        host['port'],
+                                                        app.config['DEFAULTCORENAME'])
+    system_data = query_solr(host, None, None, url=url)
+    if system_data['status'] == 'ok' and system_data['data']:
+        return system_data['data']['lucene']['lucene-spec-version']
+    else:
+        return None
 
 def query_solr(host, command, core, params=None, url=None):
-    ''' Build a HTTP query to a Solr host and execute it. 
+    """ Build a HTTP query to a Solr host and execute it. 
     
-    host: host dictionary (see soldash.settings.HOSTS)
-    command: command to be performed (see soldash.settings.COMMANDS)
-    core: perform this command on a certain core (see soldash.settings.CORES)
+    host: host dictionary (see soldash.settings['HOSTS'])
+    command: command to be performed
+    core: perform this command on a certain core (see soldash.settings['CORES'])
     params: extra parameters to pass in the URL.
     url: if a non-empty string, use this string as the URL, instead of building one.
-    '''
-    socket.setdefaulttimeout(TIMEOUT)
+    """
     if not core:
-        core = DEFAULTCORENAME
+        core = app.config['DEFAULTCORENAME']
     
     if not url:
         if command == 'reload':
-            url = 'http://%s:%s/solr/admin/cores?action=RELOAD&wt=json&core=%s' % (host['hostname'], 
-                                                                                   host['port'],
-                                                                                   core)
+            url = 'http://%s:%s/solr/admin/cores?action=RELOAD&wt=json&core=%s' % (
+                host['hostname'], host['port'], core)
+        elif command == 'select':
+            url = 'http://%s:%s/solr/%s/select?wt=json&q=%s&fl=%s' % (
+                host['hostname'], host['port'], core, params['q'], params.get('fl', ''))
         else:
-            url = 'http://%s:%s/solr/%s/replication?command=%s&wt=json' % (host['hostname'], 
-                                                                           host['port'], 
-                                                                           core,
-                                                                           command)
+            url = 'http://%s:%s/solr/%s/replication?command=%s&wt=json' % (
+                host['hostname'], host['port'], core, command)
     if params:
         for key in params:
             url += '&%s=%s' % (key, params[key])
-    if host.get('auth', {}):
-        passman = urllib2.HTTPPasswordMgrWithDefaultRealm()
-        passman.add_password(None, url, 
-                             host['auth']['username'], 
-                             host['auth']['password'])
-        auth_handler = urllib2.HTTPBasicAuthHandler(passman)
-        opener = urllib2.build_opener(auth_handler)
-        urllib2.install_opener(opener)
     try:
-        conn = urllib2.urlopen(url)
-        retval = {'status': 'ok', 
-                  'data': simplejson.load(conn)}
-    except urllib2.HTTPError, e:
-        retval = {'status': 'error',
-                  'data': 'conf',
-                  'exception': str(e)}
-    except urllib2.URLError, e:
-        retval = {'status': 'error', 
-                  'data': 'down',
-                  'exception': str(e)}
-    return retval
+        resp = requests.get(url, auth=(host['auth'].get('username'), host['auth'].get('password')))
+    except requests.ConnectionError, e:
+        return {'status': 'error', 'data': 'down', 'exception': str(e)}
+    
+    data = resp.json
+    if not data:
+        return {'status': 'error', 'data': 'empty response'}
+
+    return {'status': 'ok', 'data': resp.json}

@@ -11,7 +11,7 @@ colours:
     display: none;
 }
 
-.fixed_width_font {
+.version {
 	font-family: "Consolas", "Monaco", "Courier New", Courier, monospace;
 }
 
@@ -27,6 +27,14 @@ body {
     text-align: right;
 }
 
+.right {
+    float: right;
+}
+
+.left {
+    float: left;
+}
+
 a {
     color: #1b1d26;
 }
@@ -38,6 +46,10 @@ h2,h4,h5,h6 {
 h3 {
     color: #773027;
     margin-bottom: 0;
+}
+
+.countdown {
+    font-size: 0.7em;
 }
 
 .instances td, th {
@@ -54,7 +66,7 @@ h3 {
     text-transform: uppercase;
     font-weight: bold;
 }
-.status, .type, .generation, .solr_version {
+.status, .type, .generation, .solr_version, .size {
     text-align: center;
 }
 .critical {
@@ -80,50 +92,6 @@ h3 {
     font-weight: bold;
 }
 
-.executebutton {
-    min-height: 22px;
-    max-width: 22px;
-    margin: 0 auto;
-}
-.executebutton.enabled {
-    background-image: url("/static/images/enabled.png");
-    min-width: 72px;
-    max-width: 72px;
-}
-.executebutton.disabled {
-    background-image: url("/static/images/disabled.png");
-    min-width: 72px;
-    max-width: 72px;
-}
-.executebutton.ready {
-    background-image: url("/static/images/ready.png");
-}
-.executebutton.success {
-    background-image: url("/static/images/success.png");
-}
-.executebutton.error {
-    background-image: url("/static/images/error.png");
-}
-.executebutton.working {
-    background-image: url("/static/images/working.gif");
-}
-.reload .executebutton {
-    background-image: url("/static/images/reload.png");
-}
-
-#filelist_overlay table {
-    width: 80%;
-    margin: 0 auto;
-}
-#filelist_overlay h2 {
-    margin-top: 0;
-    color: #fff;
-}
-
-.ssh_login {
-    font-size: 1.2em;
-    color: #fff;
-}
-.ssh_login input {
-    font-size: 1.2em;
+.command {
+    text-align: center;
 }

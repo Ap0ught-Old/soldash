@@ -17,7 +17,11 @@
 #
 
 from soldash import app
-from soldash.settings import DEBUG
+from soldash.settings import settings
+from soldash.flaskext.mako import init_mako
+
 
 if __name__ == '__main__':
-    app.run(debug=DEBUG)
+    app.config.update(settings)
+    init_mako(app)
+    app.run(debug=app.config['DEBUG'])

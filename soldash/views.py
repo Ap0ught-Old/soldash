@@ -15,71 +15,53 @@
 #limitations under the License.
 #
 
-from flask import render_template, request, jsonify
+from multiprocessing import Pool
+
+from flask import request, jsonify, abort, redirect
+from flaskext.mako import render_template
 
 from soldash import app
-from soldash.helpers import get_details, query_solr, get_solr_versions
-from soldash.settings import (RESPONSEHEADERS, COMMANDS, JS_REFRESH, 
-                              DEBUG, HIDE_STATUS_MSG_SUCCESS, HIDE_STATUS_MSG_ERROR)
+import soldash.helpers as h
 
 @app.route('/')
 def homepage():
-    ''' Render and return the main homepage HTML. 
-        
-    This HTML will then be populated by javascript and EJS.
-    '''
-    cores = get_details()
-    return render_template('homepage.html', cores=cores)
+    """ Render and return the main homepage HTML. 
+    """
+    versions = {}
+    for host in app.config['HOSTS']:
+        versions[host['hostname']] = h.get_solr_version(host)
 
-@app.route('/execute/<command>', methods=['POST'])
+    pool = Pool(processes=len(app.config['HOSTS']))
+    pool_data = []
+    for core in app.config['CORES']:
+        for host in app.config['HOSTS']:
+            pool_data.append({'core': core, 'host': host})
+    c = h.repackage_details(pool.map(h.get_details, pool_data))
+    return render_template('/main.mako', c=c, h=h, 
+                           versions=versions, config=app.config)
+
+@app.route('/execute/<command>', methods=['GET'])
 def execute(command):
-    ''' Execute a command (one of soldash.settings.COMMANDS).
-    
-    Returns the output in JSON form.
-    '''
-    hostname = request.form['host']
-    port = request.form['port']
-    
-    core = request.form['core']
-    if core in ['null', 'None', 'undefined']:
-        core = None
-    auth = {}
+    """ Execute a command
+    """
+    hostname = request.args.get('hostname')
+    core = request.args.get('core')
     params = {}
-    try:
-        auth = {'username': request.form['username'],
-                'password': request.form['password']}
-    except KeyError, e:
-        pass
-    try:
-        params = {'indexversion': request.form['indexversion']}
-    except KeyError, e:
-        pass
-    host = {'hostname': hostname,
-            'port': port,
-            'auth': auth}
-    return jsonify(query_solr(host, command, core, params=params))
+    if core not in app.config['CORES']:
+        abort(400, 'Invalid core')
 
-@app.route('/solr_versions', methods=['GET'])
-def solr_versions():
-    ''' Get the versions of all Solr daemons configured in 
-    soldash.settings.HOSTS.
-    
-    Returns the output in JSON form.
-    '''
-    
-    return jsonify({'data': get_solr_versions()})
-
-@app.route('/details', methods=['GET'])
-def details():
-    ''' Get details about the current state of all Solr instances.
-    
-    Returns the output in JSON form.
-    '''
-    retval = get_details()
-    return jsonify({'data': retval,
-                    'solr_response_headers': RESPONSEHEADERS,
-                    'commands': COMMANDS,
-                    'js_refresh': JS_REFRESH,
-                    'debug': str(DEBUG).lower(),
-                    'hide_status_msg_success': HIDE_STATUS_MSG_SUCCESS,
-                    'hide_status_msg_error': HIDE_STATUS_MSG_ERROR})
+    if command == 'filelist':
+        params['indexversion'] = request.args.get('indexversion')
+    elif command == 'select':
+        params['q'] = request.args.get('q')
+        params['fl'] = request.args.get('fl', '')
+    # TODO: check validity of command name
+    try:
+        host = [obj for obj in app.config['HOSTS'] if obj['hostname'] == hostname][0]
+    except KeyError:
+        abort(400, 'Invalid hostname')
+    # TODO: Error checking from Solr
+    retval = h.query_solr(host, command, core, params=params)
+    if command in ['filelist', 'select']:
+        return jsonify(retval)
+    return redirect('/')
